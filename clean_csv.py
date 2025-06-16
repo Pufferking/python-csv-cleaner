@@ -1,4 +1,15 @@
+
+import argparse
+
 import pandas as pd
+
+
+def arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', nargs='?', required=True, help="Name of single file to process.")
+    parser.add_argument('--sep', nargs='?', default='CSV', help="Separator, either CSV, TSV or None")
+    return parser.parse_args()
+
 
 def clean_csv(file_path, fill_value="-"):
     """
@@ -7,10 +18,17 @@ def clean_csv(file_path, fill_value="-"):
     Loads a messy CSV file robustly, cleans and standardizes it.
     """
 
+    if args.sep == 'CSV':
+        sep = ','
+    elif args.sep == 'TSV':
+        sep = '\t'
+    else:
+        sep = None
+
     try:
-        df = pd.read_csv(file_path, encoding="utf-8", on_bad_lines="skip")
+        df = pd.read_csv(file_path, encoding="utf-8", on_bad_lines="skip", sep=sep)
     except UnicodeDecodeError:
-        df = pd.read_csv(file_path, encoding="latin1", on_bad_lines="skip")
+        df = pd.read_csv(file_path, encoding="latin1", on_bad_lines="skip", sep=sep)
 
     df = df.drop_duplicates()
 
@@ -35,5 +53,6 @@ def clean_csv(file_path, fill_value="-"):
     return df
 
 if __name__ == "__main__":
-    cleaned_df = clean_csv("sample_input.csv")
+    args = arguments()
+    cleaned_df = clean_csv(args.file)
     print(cleaned_df)
